@@ -12,7 +12,7 @@ const child_process = require("child_process");
 
 const isWindows = process.platform === "win32";
 
-const cmd = (command) => {
+const cmd = (command, doLog) => {
     const parseCommand = (command) => {
         if(!Array.isArray(command)) command = command.split(" ");
         // if any command arg is "sudo" then replace with "sudoReplacement"
@@ -43,9 +43,11 @@ const cmd = (command) => {
         }
         
         const commandStr = command.join(" ");
+        if(doLog) console.log("@cmd: executing", "\"" + commandStr + "\"");
         child_process.exec(commandStr, (error, stdout, stderr) => {
             if(error) reject("@cmd: An error occured whilst executing", `"${commandStr}"`, error);
             if(stderr) reject("@cmd: An stderr occured whilst executing", `"${commandStr}"`, stderr);
+            if(!stdout) resolve(true);
             resolve(stdout);
         });
     });
