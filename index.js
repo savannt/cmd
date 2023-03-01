@@ -12,7 +12,7 @@ const child_process = require("child_process");
 
 const isWindows = process.platform === "win32";
 
-const cmd = (command, doLog) => {
+const cmd = (command, doLog = false) => {
     const parseCommand = (command) => {
         if(!Array.isArray(command)) command = command.split(" ");
         // if any command arg is "sudo" then replace with "sudoReplacement"
