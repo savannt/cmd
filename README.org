@@ -1,0 +1,24 @@
+* @savant/cmd
+A crossplatform nodejs child_process.exec wrapper with a promise interface.
+
+** Install
+```bash
+npm install @savant/cmd
+```
+
+** Usage
+```javascript
+const { cmd }= require('@savant/cmd');
+
+cmd('ls -la')
+  .then((result) => {
+    console.log(result);
+  })
+  .catch((err) => {
+    console.error(err);
+  });
+
+// Other syntax:
+// cmd(["ls", "-la"])
+// cmd([[ "ls", "-la" ], [ "cd", "/tmp" ], [ "ls", "-la"]])
+```
