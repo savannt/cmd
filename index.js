@@ -26,8 +26,8 @@ const cmd = (command) => {
     }
     // if command is obj
     if(typeof command === "object") {
-        if(command.linux && !isWindows) command = command.linux;
-        else if(command.windows && isWindows) command = command.windows;
+        if(command.linux && !isWindows) command = parseCommand(command.linux);
+        else if(command.windows && isWindows) command = parseCommand(command.windows);
         else {
             console.log("Invalid command object");
             return;
