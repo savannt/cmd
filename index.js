@@ -12,46 +12,29 @@ const child_process = require("child_process");
 
 const isWindows = process.platform === "win32";
 
-const cmd = (...setOfCommands) => {
-    const parseCommands = (commands) => {
-        if(!Array.isArray(commands) || typeof commands[0] === "string") commands = [commands];
-
-        // if a command is a string, convert it to an array (split by spaces)
-        commands = commands.map((command) => {
-            if(typeof command === "string") {
-                return command.split(" ");
-            }
-            return command;
-        });
-
+const cmd = (command) => {
+    const parseCommand = (command) => {
+        if(!Array.isArray(command)) command = command.split(" ");
         // if any command arg is "sudo" then replace with "sudoReplacement"
-        commands = commands.map((command) => {
-            return command.map((arg) => {
-                if(arg === "sudo") {
-                    return sudoReplacement;
-                }
-                return arg;
-            });
+        const sudoReplacement = password ? `echo ${password} | sudo -S` : "sudo";
+        command = command.map((arg) => {
+            if(arg === "sudo") return sudoReplacement;
+            return arg;
         });
 
-        return commands;
+        return command;
     }
-    const sudoReplacement = password ? `echo ${password} | sudo -S` : "sudo";
-
-    const parsedSetOfCommands = setOfCommands.map((commands) => {
-        return parseCommands(commands);
-    });
-
-    // if only linux commands are given, but we are on windows- throw error
-    if(isWindows && parsedSetOfCommands.length === 1) throw new Error("@cmd: No windows commands given.");
-
-    const targetCommand = isWindows ? parsedSetOfCommands[1] : parsedSetOfCommands[0];
-    
-    // targetCommand is an array of arrays which are commands, the inner arrays should join, and outer ararys join with &&
-    const targetCommandString = targetCommand.map((command) => {
-        return command.join(" ");
-    }).join(" && ");
-
+    // if command is obj
+    if(typeof command === "object") {
+        if(command.linux && !isWindows) command = command.linux;
+        else if(command.windows && isWindows) command = command.windows;
+        else {
+            console.log("Invalid command object");
+            return;
+        }
+    } else {
+        command = parseCommand(command);
+    }
 
     return new Promise((resolve) => {
         function reject (...args) {
@@ -59,9 +42,10 @@ const cmd = (...setOfCommands) => {
             resolve(false);
         }
         
-        child_process.exec(targetCommandString, (error, stdout, stderr) => {
-            if(error) reject("@cmd: An error occured whilst executing", `"${targetCommand.join(" ")}"`, error);
-            if(stderr) reject("@cmd: An error occured whilst executing", `"${targetCommand.join(" ")}"`, stderr);
+        const commandStr = command.join(" ");
+        child_process.exec(commandStr, (error, stdout, stderr) => {
+            if(error) reject("@cmd: An error occured whilst executing", `"${commandStr}"`, error);
+            if(stderr) reject("@cmd: An stderr occured whilst executing", `"${commandStr}"`, stderr);
             resolve(stdout);
         });
     });
