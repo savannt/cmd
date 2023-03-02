@@ -14,15 +14,19 @@ const isWindows = process.platform === "win32";
 
 const cmd = (command, doLog = false) => {
     const parseCommand = (command) => {
-        if(!Array.isArray(command)) command = command.split(" ");
-        // if any command arg is "sudo" then replace with "sudoReplacement"
+        // if(!Array.isArray(command)) command = command.split(" ");
+        // // if any command arg is "sudo" then replace with "sudoReplacement"
         const sudoReplacement = password ? `echo ${password} | sudo -S` : "sudo";
-        command = command.map((arg) => {
-            if(arg === "sudo") return sudoReplacement;
-            return arg;
-        });
+        // command = command.map((arg) => {
+        //     if(arg === "sudo") return sudoReplacement;
+        //     return arg;
+        // });
+        // 
+        // return command;
 
-        return command;
+
+        // replace all "sudo" with "sudoReplacement"
+        return command.replace(/sudo/g, sudoReplacement);
     }
     // if command is obj
     if(typeof command === "object") {
@@ -42,7 +46,7 @@ const cmd = (command, doLog = false) => {
             resolve(false);
         }
         
-        const commandStr = command.join(" ");
+        const commandStr = command;
         if(doLog) console.log("@cmd: executing", "\"" + commandStr + "\"");
         child_process.exec(commandStr, (error, stdout, stderr) => {
             if(error) reject("@cmd: An error occured whilst executing", `"${commandStr}"`, error);
