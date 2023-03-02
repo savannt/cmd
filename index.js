@@ -22,19 +22,19 @@ const cmd = (command, doLog = false) => {
             // });
             // 
             // return command;
-            
-            if(command.includes("sudo")) {
-                if(!password) throw new Error("@cmd: Password not set");
-                const sudoReplacement = `echo ${password} | sudo -S`;
-                command = command.replace(/sudo/g, sudoReplacement);
-            }
-            return command;
+        // }
+
+        if(command.includes("sudo")) {
+            if(!password) throw new Error("@cmd: Password not set");
+            const sudoReplacement = `echo ${password} | sudo -S`;
+            command = command.replace(/sudo/g, sudoReplacement);
         }
+        return command;
 
 
-        // replace all "sudo" with "sudoReplacement"
-        return command.replace(/sudo/g, sudoReplacement);
     }
+
+
     // if command is obj
     if(typeof command === "object") {
         if(command.linux && !isWindows) command = parseCommand(command.linux);
