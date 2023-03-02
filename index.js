@@ -16,13 +16,20 @@ const cmd = (command, doLog = false) => {
     const parseCommand = (command) => {
         // if(!Array.isArray(command)) command = command.split(" ");
         // // if any command arg is "sudo" then replace with "sudoReplacement"
-        const sudoReplacement = password ? `echo ${password} | sudo -S` : "sudo";
         // command = command.map((arg) => {
-        //     if(arg === "sudo") return sudoReplacement;
-        //     return arg;
-        // });
-        // 
-        // return command;
+            //     if(arg === "sudo") return sudoReplacement;
+            //     return arg;
+            // });
+            // 
+            // return command;
+            
+            if(command.includes("sudo")) {
+                if(!password) throw new Error("@cmd: Password not set");
+                const sudoReplacement = `echo ${password} | sudo -S`;
+                command = command.replace(/sudo/g, sudoReplacement);
+            }
+            return command;
+        }
 
 
         // replace all "sudo" with "sudoReplacement"
@@ -47,7 +54,7 @@ const cmd = (command, doLog = false) => {
         }
         
         const commandStr = command;
-        if(doLog) console.log("@cmd: executing", "\"" + commandStr + "\"");
+        if(doLog) console.log("@cmd: executing cmd string", "\"" + commandStr + "\"");
         child_process.exec(commandStr, (error, stdout, stderr) => {
             if(error) reject("@cmd: An error occured whilst executing", `"${commandStr}"`, error);
             if(stderr) reject("@cmd: An stderr occured whilst executing", `"${commandStr}"`, stderr);
