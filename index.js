@@ -78,7 +78,7 @@ const cmd = (command, doLog = false) => {
     return new Promise((resolve) => {
         function reject (...args) {
             if(doLog) console.log(...args);
-            resolve(args[2]);
+            resolve(args[2].toString());
         }
         
         const commandStr = command;
