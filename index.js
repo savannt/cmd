@@ -59,7 +59,8 @@ const cmd = (command, doLog = false) => {
             const sudoReplacement = `sudo -S <<< ${password}`;
             const sudoReplacement2 = `sudo -S`;
             command = command.replace("sudo", sudoReplacement);
-            command = command.replace(/sudo/g, sudoReplacement2);
+            // make sure we don't replace the first sudo occurence
+            command = command.replace(/sudo(?!\s+-S)/g, sudoReplacement2);
         }
         return command;
 
