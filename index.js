@@ -2,6 +2,7 @@ let password;
 
 const setPassword = (_password) => {
     password = _password;
+    savePassword(password);
 }
 
 const savePassword = (password) => {
@@ -31,19 +32,9 @@ const child_process = require("child_process");
 
 const isWindows = process.platform === "win32";
 
-const cmd = (command, doLog = false) => {
-    if(password) savePassword(password);
-    const parseCommand = (command) => {
-        // if(!Array.isArray(command)) command = command.split(" ");
-        // // if any command arg is "sudo" then replace with "sudoReplacement"
-        // command = command.map((arg) => {
-            //     if(arg === "sudo") return sudoReplacement;
-            //     return arg;
-            // });
-            // 
-            // return command;
-        // }
+const parseCommand = (command, doLog = false) => {
 
+    const _parseCommand = (command) => {
         if(command.includes("sudo")) {
             if(!password) {
                 const savedPassword = getPassword();
@@ -63,22 +54,39 @@ const cmd = (command, doLog = false) => {
             command = command.replace(/sudo(?!\s+-S)/g, sudoReplacement2);
         }
         return command;
-
-
     }
-
 
     // if command is obj
     if(typeof command === "object") {
-        if(command.linux && !isWindows) command = parseCommand(command.linux);
-        else if(command.windows && isWindows) command = parseCommand(command.windows);
+        if(command.linux && !isWindows) command = _parseCommand(command.linux);
+        else if(command.windows && isWindows) command = _parseCommand(command.windows);
         else {
             console.log("Invalid command object");
             return;
         }
     } else {
-        command = parseCommand(command);
+        command = _parseCommand(command);
     }
+}
+
+
+const cmdSync = (command, doLog = false) => {
+    command = parseCommand(command, doLog);
+
+    const commandStr = command;
+    if(doLog) console.log("@cmd: executing cmd string", "\"" + commandStr + "\"");
+
+    try {
+        const stdout = child_process.execSync(commandStr);
+        if(!stdout) return true;
+        return stdout;
+    } catch (err) {
+        return false;
+    }
+}
+
+const cmd = (command, doLog = false) => {
+    command = parseCommand(command, doLog);
 
     return new Promise((resolve) => {
         function reject (...args) {
@@ -102,5 +110,6 @@ const cmd = (command, doLog = false) => {
 
 module.exports = {
     cmd,
+    cmdSync,
     setPassword
 }
