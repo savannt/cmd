@@ -67,6 +67,7 @@ const parseCommand = (command, doLog = false) => {
     } else {
         command = _parseCommand(command);
     }
+    return command;
 }
 
 
